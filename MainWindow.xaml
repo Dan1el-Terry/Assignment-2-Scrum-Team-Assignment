@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:Assign_2"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid Margin="30">
+    <Grid>
+        <StackPanel x:Name="LoginScreen" Visibility="Visible">
+        <Grid Margin="30">
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -29,4 +31,14 @@
                 Height="30"
                 Click="LoginButton_Click"/>
         </Grid>
+        </StackPanel>
+        <StackPanel x:Name="AdminScreen" Visibility="Collapsed">
+            <TextBlock>Welcome Admin</TextBlock>
+            <Button Content="Logout" Click="LogoutButton_Click"/>
+        </StackPanel>
+         <StackPanel x:Name="GuessScreen" Visibility="Collapsed">
+            <TextBlock>Welcome Guest</TextBlock>
+            <Button Content="Logout" Click="LogoutButton_Click"/>
+        </StackPanel>
+    </Grid>
 </Window>
