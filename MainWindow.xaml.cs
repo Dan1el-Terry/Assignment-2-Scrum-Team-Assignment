@@ -23,9 +23,9 @@ namespace Assign_2
                 {
                     AdminScreen.Visibility = Visibility.Visible;
                 }
-                else if (role == "Guest")
+                else if (role == "User")
                 {
-                    GuestScreen.Visibility = Visibility.Visible;
+                    UserScreen.Visibility = Visibility.Visible;
                 }
             }
             else
@@ -37,7 +37,7 @@ namespace Assign_2
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
             AdminScreen.Visibility = Visibility.Collapsed;
-            GuestScreen.Visibility = Visibility.Collapsed;
+            UserScreen.Visibility = Visibility.Collapsed;
             LoginScreen.Visibility = Visibility.Visible;
         }
     }

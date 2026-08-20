@@ -36,16 +36,16 @@ public static class UserDatabase
                 if ((long)checkCommand.ExecuteScalar() == 0)
                 {
                     string adminHash = BCrypt.Net.BCrypt.HashPassword("admin123");
-                    string guestHash = BCrypt.Net.BCrypt.HashPassword("guest123");
+                    string UserHash = BCrypt.Net.BCrypt.HashPassword("User123");
 
                     string insertText = @"
                         INSERT INTO Users (Username, PasswordHash, Role) VALUES ('admin', @adminHash, 'Admin');
-                        INSERT INTO Users (Username, PasswordHash, Role) VALUES ('guest', @guestHash, 'Guest');";
+                        INSERT INTO Users (Username, PasswordHash, Role) VALUES ('User', @UserHash, 'User');";
 
                     using (var insertCommand = new SqliteCommand(insertText, connection))
                     {
                         insertCommand.Parameters.AddWithValue("@adminHash", adminHash);
-                        insertCommand.Parameters.AddWithValue("@guestHash", guestHash);
+                        insertCommand.Parameters.AddWithValue("@UserHash", UserHash);
                         insertCommand.ExecuteNonQuery();
                     }
                 }

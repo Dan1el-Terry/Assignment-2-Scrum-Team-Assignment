@@ -17,10 +17,21 @@
             <TextBlock Text="This is the Admin View" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
             <Button Content="Logout" Width="100" Height="30" Click="LogoutButton_Click"/>
         </StackPanel>
+        <!-- NEW USER VIEW (BLANK) -->
+            <StackPanel x:Name="NewUserScreen" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Create User Below" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+            <TextBox x:Name="NewUsername" Height="25" Margin="0,0,0,10"/>
+            <TextBox x:Name="NewPassword" Height="25" Margin="0,0,0,10"/>
+            <ComboBox x:Name="NewRole" Height="25" Margin="0,0,0,10">
+                <ComboBoxItem Content="Admin"/>
+                <ComboBoxItem Content="User"/>
+            </ComboBox>
+            <Button Content="Return" Width="100" Height="30" Click="ReturnButton_Click"/>
+        </StackPanel>
 
-        <!-- GUEST VIEW (BLANK) -->
-        <StackPanel x:Name="GuestScreen" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="This is the Guest View" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+        <!-- User VIEW (BLANK) -->
+        <StackPanel x:Name="UserScreen" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="This is the User View" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
             <Button Content="Logout" Width="100" Height="30" Click="LogoutButton_Click"/>
         </StackPanel>
 
