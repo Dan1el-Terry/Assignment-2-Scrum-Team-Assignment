@@ -1,44 +1,28 @@
 ﻿<Window x:Class="Assign_2.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Assign_2"
-        mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <StackPanel x:Name="LoginScreen" Visibility="Visible">
-        <Grid Margin="30">
 
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <TextBox x:Name="UsernameBox"
-                 Grid.Row="0"
-                 Height="30"
-                 Margin="0,0,0,15"/>
-
-            <PasswordBox x:Name="PasswordBox"
-                     Grid.Row="1"
-                     Height="30"
-                     Margin="0,0,0,15"/>
-
-            <Button Grid.Row="2"
-                Content="Login"
-                Height="30"
-                Click="LoginButton_Click"/>
-        </Grid>
+        <!-- LOGIN SCREEN -->
+        <StackPanel x:Name="LoginScreen" Visibility="Visible" VerticalAlignment="Center" HorizontalAlignment="Center" Width="250">
+            <TextBlock Text="Login" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+            <TextBox x:Name="UsernameBox" Height="25" Margin="0,0,0,10"/>
+            <PasswordBox x:Name="PasswordBox" Height="25" Margin="0,0,0,15"/>
+            <Button Content="Sign In" Height="30" Click="LoginButton_Click"/>
         </StackPanel>
-        <StackPanel x:Name="AdminScreen" Visibility="Collapsed">
-            <TextBlock>Welcome Admin</TextBlock>
-            <Button Content="Logout" Click="LogoutButton_Click"/>
+
+        <!-- ADMIN VIEW (BLANK) -->
+        <StackPanel x:Name="AdminScreen" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="This is the Admin View" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+            <Button Content="Logout" Width="100" Height="30" Click="LogoutButton_Click"/>
         </StackPanel>
-         <StackPanel x:Name="GuessScreen" Visibility="Collapsed">
-            <TextBlock>Welcome Guest</TextBlock>
-            <Button Content="Logout" Click="LogoutButton_Click"/>
+
+        <!-- GUEST VIEW (BLANK) -->
+        <StackPanel x:Name="GuestScreen" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="This is the Guest View" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+            <Button Content="Logout" Width="100" Height="30" Click="LogoutButton_Click"/>
         </StackPanel>
+
     </Grid>
 </Window>
