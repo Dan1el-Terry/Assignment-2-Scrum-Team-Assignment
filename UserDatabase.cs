@@ -16,46 +16,47 @@ public static class UserDatabase
         {
             connection.Open();
 
-            string commandText = @"
-                CREATE TABLE IF NOT EXISTS Users (
+            //Drop old table so changes apply every time you run
+            string dropText = "DROP TABLE IF EXISTS Users;";
+            using (var dropCommand = new SqliteCommand(dropText, connection))
+            {
+                dropCommand.ExecuteNonQuery();
+            }
+
+            //Create fresh table
+            string createText = @"
+                CREATE TABLE Users (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     Username TEXT UNIQUE NOT NULL,
                     PasswordHash TEXT NOT NULL,
                     Role TEXT NOT NULL
                 );";
 
-            using (var command = new SqliteCommand(commandText, connection))
+            using (var createCommand = new SqliteCommand(createText, connection))
             {
-                command.ExecuteNonQuery();
+                createCommand.ExecuteNonQuery();
             }
 
-            // Seed default accounts if empty
-            string checkText = "SELECT COUNT(1) FROM Users;";
-            using (var checkCommand = new SqliteCommand(checkText, connection))
+            //Seed updated accounts
+            string adminHash = BCrypt.Net.BCrypt.HashPassword("admin123");
+            string userHash = BCrypt.Net.BCrypt.HashPassword("user123");
+
+            string insertText = @"
+                INSERT INTO Users (Username, PasswordHash, Role) VALUES ('admin', @adminHash, 'Admin');
+                INSERT INTO Users (Username, PasswordHash, Role) VALUES ('user', @userHash, 'User');";
+
+            using (var insertCommand = new SqliteCommand(insertText, connection))
             {
-                if ((long)checkCommand.ExecuteScalar() == 0)
-                {
-                    string adminHash = BCrypt.Net.BCrypt.HashPassword("admin123");
-                    string UserHash = BCrypt.Net.BCrypt.HashPassword("User123");
-
-                    string insertText = @"
-                        INSERT INTO Users (Username, PasswordHash, Role) VALUES ('admin', @adminHash, 'Admin');
-                        INSERT INTO Users (Username, PasswordHash, Role) VALUES ('User', @UserHash, 'User');";
-
-                    using (var insertCommand = new SqliteCommand(insertText, connection))
-                    {
-                        insertCommand.Parameters.AddWithValue("@adminHash", adminHash);
-                        insertCommand.Parameters.AddWithValue("@UserHash", UserHash);
-                        insertCommand.ExecuteNonQuery();
-                    }
-                }
+                insertCommand.Parameters.AddWithValue("@adminHash", adminHash);
+                insertCommand.Parameters.AddWithValue("@userHash", userHash);
+                insertCommand.ExecuteNonQuery();
             }
         }
     }
 
     public static bool Login(string username, string password, out string role)
     {
-        role = string.Empty;    
+        role = string.Empty;
 
         using (var connection = new SqliteConnection(ConnectionString))
         {
