@@ -80,4 +80,29 @@ public static class UserDatabase
         }
         return false;
     }
+
+    public static bool Register(string username, string password, string role)
+    {
+        using (var connection = new SqliteConnection(ConnectionString))
+        {
+            connection.Open();
+            string query = "INSERT INTO Users (Username, PasswordHash, Role) VALUES (@username, @passwordHash, @role);";
+            using (var command = new SqliteCommand(query, connection))
+            {
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+                command.Parameters.AddWithValue("@username", username);
+                command.Parameters.AddWithValue("@passwordHash", passwordHash);
+                command.Parameters.AddWithValue("@role", role);
+                try
+                {
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+                catch (SqliteException ex) when (ex.SqliteErrorCode == 19) // Unique constraint violation
+                {
+                    throw new Exception("Username already exists.");
+                }
+            }
+        }
+    }
 }
