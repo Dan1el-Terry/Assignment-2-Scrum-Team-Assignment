@@ -1,9 +1,14 @@
 ﻿using System;
 using Microsoft.Data.Sqlite;
 
+
+/// <summary>
+/// open in vs code to see the tables
+/// </summary>
 public static class UserDatabase
 {
-    private const string ConnectionString = "Data Source=users.db";
+    private static string ConnectionString = 
+        "Data Source=../../../users.db";
 
     static UserDatabase()
     {
