@@ -26,7 +26,7 @@
                 <ComboBoxItem Content="Admin"/>
                 <ComboBoxItem Content="User"/>
             </ComboBox>
-            <Button Content="Return" Width="100" Height="30" Click="ReturnButton_Click"/>
+            <!--<Button Content="Return" Width="100" Height="30" Click="ReturnButton_Click"/>-->
         </StackPanel>
 
         <!-- User VIEW (BLANK) -->
