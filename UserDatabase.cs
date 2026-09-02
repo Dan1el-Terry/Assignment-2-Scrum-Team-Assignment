@@ -43,12 +43,15 @@ public static class UserDatabase
             }
 
             //Seed updated accounts
+           
             string adminHash = BCrypt.Net.BCrypt.HashPassword("admin123");
             string userHash = BCrypt.Net.BCrypt.HashPassword("user123");
 
+
             string insertText = @"
-                INSERT INTO Users (Username, PasswordHash, Role) VALUES ('admin', @adminHash, 'Admin');
-                INSERT INTO Users (Username, PasswordHash, Role) VALUES ('user', @userHash, 'User');";
+                INSERT INTO Users (Username, PasswordHash, Role) VALUES 
+                ('admin', @adminHash, 'Admin'),
+                ('alex', @userHash, 'User');";
 
             using (var insertCommand = new SqliteCommand(insertText, connection))
             {

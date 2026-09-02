@@ -1,4 +1,5 @@
-﻿<Window x:Class="Assign_2.MainWindow"
+﻿    <!-- summary -->
+    <Window x:Class="Assign_2.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="450" Width="800">

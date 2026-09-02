@@ -2,6 +2,9 @@
 
 namespace Assign_2
 {
+    /// <summary>
+    /// open in vs code to see the tables
+    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
