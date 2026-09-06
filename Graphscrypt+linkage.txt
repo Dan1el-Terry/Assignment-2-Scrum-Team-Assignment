@@ -1,0 +1,74 @@
+Package:
+Install-Package LiveChartsCore.SkiaSharpView.WPF
+Added to xaml window:
+xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+
+New Variables  inside mainwindow.cs :
+private void SetupTempChart()
+{
+    TempChart.Series = new ISeries[]
+    {
+new LineSeries<double>
+{
+    Values = tempReadings,
+    GeometrySize = 5,
+    Fill = null
+}
+    };
+}
+
+private void StartTempTimer()
+{
+    if (tempTimer != null)
+    {
+        return;
+    }
+
+    tempTimer = new DispatcherTimer();
+    tempTimer.Interval = TimeSpan.FromSeconds(5);
+    tempTimer.Tick += TempTimer_Tick;
+    tempTimer.Start();
+
+    // add one reading immediately so the graph isnt empty on load
+    TempTimer_Tick(null, null);
+}
+
+private void TempTimer_Tick(object sender, EventArgs e)
+{
+    double newTemp = Math.Round(20 + rng.NextDouble() * 10, 1); // random value between 20 and 30
+
+    tempReadings.Add(newTemp);
+
+    if (tempReadings.Count > 15)
+    {
+        tempReadings.RemoveAt(0);
+    }
+    
+
+    CurrentTempText.Text = "Current Temp: " + newTemp + " °C";
+}
+
+private void StopTempTimer()
+{
+    if (tempTimer != null)
+    {
+        tempTimer.Stop();
+        tempTimer = null;
+    }
+}
+
+Changes needed to be added:
+StopTempTimer(); needs to be added to LogoutButton_Click
+
+SetupTempChart();
+StartTempTimer(); both need to be added to the else statement inside LoginButton_Click
+
+private ObservableCollection<double> tempReadings = new ObservableCollection<double>();
+private DispatcherTimer tempTimer;
+private Random rng = new Random(); These need to be added to top of the Class inside .xaml.cs
+
+<TextBlock Text="Temperature Monitor" FontSize="20" FontWeight="Bold" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+<TextBlock x:Name="CurrentTempText" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+
+<lvc:CartesianChart x:Name="TempChart" Height="300" Margin="0,0,0,15"/>
+All needs to be added to the User view xaml
