@@ -19,21 +19,28 @@ namespace Assign_2
             string password = PasswordBox.Password;
             string role;
 
-            bool success = UserDatabase.Login(username, password, out role);
+            try
+            {
+                bool success = UserDatabase.Login(username, password, out role);
 
-            if (success == false)
-            {
-                MessageBox.Show("Invalid username or password.");
-                return;
-            }
+                if (success == false)
+                {
+                    MessageBox.Show("Invalid username or password.");
+                    return;
+                }
 
-            if (role == "Admin")
-            {
-                OpenAdminScreen();
+                if (role == "Admin")
+                {
+                    OpenAdminScreen();
+                }
+                else
+                {
+                    ShowScreen(UserScreen);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                ShowScreen(UserScreen);
+                MessageBox.Show(ex.Message);
             }
         }
 

@@ -3,11 +3,7 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Windows.Controls;
-/// <summary>
-/// Note if you delete/change information in the table inside the app, you can just delete the .mdf and .ldf file and reopen 
-/// the app the pre created uers will pop up agian
-/// </summary>
+
 public static class UserDatabase
 {
     private static readonly string ProjectRoot =
@@ -15,112 +11,94 @@ public static class UserDatabase
 
     private static readonly string DbPath = Path.Combine(ProjectRoot, "users.mdf");
 
+    private const string DatabaseName = "UserDb_Root";
+
     private static readonly string ConnectionString =
-        $@"Server=(localdb)\mssqllocaldb;AttachDbFilename={DbPath};Integrated Security=True;TrustServerCertificate=True;";
+        $@"Server=(localdb)\mssqllocaldb;AttachDbFilename={DbPath};Database={DatabaseName};Integrated Security=True;TrustServerCertificate=True;";
 
     private const string MasterConnectionString =
         @"Server=(localdb)\mssqllocaldb;Database=master;Integrated Security=True;TrustServerCertificate=True;";
 
     static UserDatabase()
     {
-        try
-        {
-            InitializeDatabase();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"DB Init Error: {ex.Message}");
-            throw;
-        }
+        InitializeDatabase();
     }
 
     private static void InitializeDatabase()
     {
-        if (!File.Exists(DbPath))
+        using var master = new SqlConnection(MasterConnectionString);
+        master.Open();
+
+        bool isRegistered = RunScalarBool(master, $"SELECT COUNT(*) FROM sys.databases WHERE name = '{DatabaseName}';");
+        bool fileExists = File.Exists(DbPath);
+
+        if (isRegistered && !fileExists)
         {
-            CreateDatabaseFile();
+            RunNonQuery(master, $"DROP DATABASE IF EXISTS [{DatabaseName}];");
+            isRegistered = false;
         }
 
-        using var connection = new SqlConnection(ConnectionString);
-        connection.Open();
-
-        if (!UsersTableExists(connection))
+        if (!isRegistered && fileExists)
         {
-            CreateUsersTable(connection);
+            RunNonQuery(master, $"CREATE DATABASE [{DatabaseName}] ON (FILENAME = '{DbPath}') FOR ATTACH;");
+        }
+        else if (!isRegistered && !fileExists)
+        {
+            RunNonQuery(master, $"CREATE DATABASE [{DatabaseName}] ON PRIMARY (NAME = {DatabaseName}_Data, FILENAME = '{DbPath}');");
+        }
+
+        using var connection = OpenConnection();
+
+        bool tableExists = RunScalarBool(connection, "SELECT OBJECT_ID('dbo.Users', 'U');", checkNotNull: true);
+
+        if (!tableExists)
+        {
+            RunNonQuery(connection, @"
+                CREATE TABLE dbo.Users (
+                    Id INT IDENTITY(1,1) PRIMARY KEY,
+                    Username NVARCHAR(100) UNIQUE NOT NULL,
+                    PasswordHash NVARCHAR(MAX) NOT NULL,
+                    Role NVARCHAR(50) NOT NULL
+                );");
+
             SeedDefaultUsers(connection);
         }
-    }
-    //Keep this as its run by initalizeddatabase if the .mdf file is deleted
-    private static void CreateDatabaseFile()
-    {
-        using var masterConnection = new SqlConnection(MasterConnectionString);
-        masterConnection.Open();
-
-        string createDbQuery = $@"
-            CREATE DATABASE [UserDb_Root] 
-            ON PRIMARY (NAME = UserDb_Root_Data, FILENAME = '{DbPath}')";
-
-        using var command = new SqlCommand(createDbQuery, masterConnection);
-        command.ExecuteNonQuery();
-    }
-
-    private static bool UsersTableExists(SqlConnection connection)
-    {
-        string query = "SELECT OBJECT_ID('dbo.Users', 'U');";
-        using var command = new SqlCommand(query, connection);
-        return command.ExecuteScalar() != DBNull.Value;
-    }
-
-    private static void CreateUsersTable(SqlConnection connection)
-    {
-        string createTableQuery = @"
-            CREATE TABLE dbo.Users (
-                Id INT IDENTITY(1,1) PRIMARY KEY,
-                Username NVARCHAR(100) UNIQUE NOT NULL,
-                PasswordHash NVARCHAR(MAX) NOT NULL,
-                Role NVARCHAR(50) NOT NULL
-            );";
-
-        using var command = new SqlCommand(createTableQuery, connection);
-        command.ExecuteNonQuery();
     }
 
     private static void SeedDefaultUsers(SqlConnection connection)
     {
-        //Add new passwords make them simple to input
-        string adminHash = BCrypt.Net.BCrypt.HashPassword("admin123");
-        string user1Hash = BCrypt.Net.BCrypt.HashPassword("user123");
-        string user2Hash = BCrypt.Net.BCrypt.HashPassword("user123");
-        string user3Hash = BCrypt.Net.BCrypt.HashPassword("user123");
-        string user4Hash = BCrypt.Net.BCrypt.HashPassword("user123");
+        var defaultUsers = new (string Username, string Password, string Role)[]
+        {
+            ("admin", "admin123", "Admin"),
+            ("alex", "user123", "User"),
+            ("jordan", "user123", "User"),
+            ("sam", "user123", "User"),
+            ("taylor", "user123", "User"),
+        };
 
-        string insertQuery = @"
-            INSERT INTO dbo.Users (Username, PasswordHash, Role) VALUES 
-            ('admin', @adminHash, 'Admin'),
-            ('alex', @user1Hash, 'User'),
-            ('jordan', @user2Hash, 'User'),
-            ('sam', @user3Hash, 'User'),
-            ('taylor', @user4Hash, 'User');";
+        foreach (var user in defaultUsers)
+        {
+            string hash = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
-        using var command = new SqlCommand(insertQuery, connection);
-        command.Parameters.AddWithValue("@adminHash", adminHash);
-        command.Parameters.AddWithValue("@user1Hash", user1Hash);
-        command.Parameters.AddWithValue("@user2Hash", user2Hash);
-        command.Parameters.AddWithValue("@user3Hash", user3Hash);
-        command.Parameters.AddWithValue("@user4Hash", user4Hash);
-        command.ExecuteNonQuery();
+            using var command = new SqlCommand(
+                "INSERT INTO dbo.Users (Username, PasswordHash, Role) VALUES (@username, @hash, @role);",
+                connection);
+
+            command.Parameters.AddWithValue("@username", user.Username);
+            command.Parameters.AddWithValue("@hash", hash);
+            command.Parameters.AddWithValue("@role", user.Role);
+            command.ExecuteNonQuery();
+        }
     }
 
     public static bool Login(string username, string password, out string role)
     {
         role = string.Empty;
 
-        using var connection = new SqlConnection(ConnectionString);
-        connection.Open();
+        using var connection = OpenConnection();
+        using var command = new SqlCommand(
+            "SELECT PasswordHash, Role FROM dbo.Users WHERE Username = @username;", connection);
 
-        string query = "SELECT PasswordHash, Role FROM dbo.Users WHERE Username = @username;";
-
-        using var command = new SqlCommand(query, connection);
         command.Parameters.AddWithValue("@username", username);
 
         using var reader = command.ExecuteReader();
@@ -136,15 +114,12 @@ public static class UserDatabase
 
     public static bool Register(string username, string password, string role)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        connection.Open();
+        using var connection = OpenConnection();
+        using var command = new SqlCommand(
+            "INSERT INTO dbo.Users (Username, PasswordHash, Role) VALUES (@username, @hash, @role);", connection);
 
-        string query = "INSERT INTO dbo.Users (Username, PasswordHash, Role) VALUES (@username, @passwordHash, @role);";
-        string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
-        using var command = new SqlCommand(query, connection);
         command.Parameters.AddWithValue("@username", username);
-        command.Parameters.AddWithValue("@passwordHash", passwordHash);
+        command.Parameters.AddWithValue("@hash", BCrypt.Net.BCrypt.HashPassword(password));
         command.Parameters.AddWithValue("@role", role);
 
         try
@@ -162,12 +137,8 @@ public static class UserDatabase
     {
         var users = new List<UserRecord>();
 
-        using var connection = new SqlConnection(ConnectionString);
-        connection.Open();
-
-        string query = "SELECT Id, Username, Role FROM dbo.Users ORDER BY Username;";
-
-        using var command = new SqlCommand(query, connection);
+        using var connection = OpenConnection();
+        using var command = new SqlCommand("SELECT Id, Username, Role FROM dbo.Users ORDER BY Username;", connection);
         using var reader = command.ExecuteReader();
 
         while (reader.Read())
@@ -185,12 +156,10 @@ public static class UserDatabase
 
     public static bool UpdateUser(int id, string newUsername, string newRole)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        connection.Open();
+        using var connection = OpenConnection();
+        using var command = new SqlCommand(
+            "UPDATE dbo.Users SET Username = @username, Role = @role WHERE Id = @id;", connection);
 
-        string query = "UPDATE dbo.Users SET Username = @username, Role = @role WHERE Id = @id;";
-
-        using var command = new SqlCommand(query, connection);
         command.Parameters.AddWithValue("@username", newUsername);
         command.Parameters.AddWithValue("@role", newRole);
         command.Parameters.AddWithValue("@id", id);
@@ -204,33 +173,51 @@ public static class UserDatabase
             throw new Exception("Username already exists.");
         }
     }
-    //Update password currently doesn't require an existing user need to change that
+
     public static bool UpdatePassword(int id, string newPassword)
     {
-        string newHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        using var connection = OpenConnection();
+        using var command = new SqlCommand(
+            "UPDATE dbo.Users SET PasswordHash = @hash WHERE Id = @id;", connection);
 
-        using var connection = new SqlConnection(ConnectionString);
-        connection.Open();
-
-        string query = "UPDATE dbo.Users SET PasswordHash = @passwordHash WHERE Id = @id;";
-
-        using var command = new SqlCommand(query, connection);
-        command.Parameters.AddWithValue("@passwordHash", newHash);
+        command.Parameters.AddWithValue("@hash", BCrypt.Net.BCrypt.HashPassword(newPassword));
         command.Parameters.AddWithValue("@id", id);
 
         return command.ExecuteNonQuery() > 0;
     }
-    //dont know if we need DeleteUser or not
+
     public static bool DeleteUser(int id)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        connection.Open();
-
-        string query = "DELETE FROM dbo.Users WHERE Id = @id;";
-
-        using var command = new SqlCommand(query, connection);
+        using var connection = OpenConnection();
+        using var command = new SqlCommand("DELETE FROM dbo.Users WHERE Id = @id;", connection);
         command.Parameters.AddWithValue("@id", id);
 
         return command.ExecuteNonQuery() > 0;
+    }
+
+    private static SqlConnection OpenConnection()
+    {
+        var connection = new SqlConnection(ConnectionString);
+        connection.Open();
+        return connection;
+    }
+
+    private static void RunNonQuery(SqlConnection connection, string sql)
+    {
+        using var command = new SqlCommand(sql, connection);
+        command.ExecuteNonQuery();
+    }
+
+    private static bool RunScalarBool(SqlConnection connection, string sql, bool checkNotNull = false)
+    {
+        using var command = new SqlCommand(sql, connection);
+        object result = command.ExecuteScalar();
+
+        if (checkNotNull)
+        {
+            return result != DBNull.Value;
+        }
+
+        return Convert.ToInt32(result) > 0;
     }
 }
