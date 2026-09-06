@@ -7,7 +7,7 @@
         <!-- LOGIN SCREEN -->
         <StackPanel x:Name="LoginScreen" Visibility="Visible" VerticalAlignment="Center" HorizontalAlignment="Center" Width="250">
             <TextBlock Text="Login" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" HorizontalAlignment="Center"/>
-            <TextBox x:Name="UsernameBox" Height="25" Margin="0,0,0,10" TextChanged="UsernameBox_TextChanged"/>
+            <TextBox x:Name="UsernameBox" Height="25" Margin="0,0,0,10"/>
             <PasswordBox x:Name="PasswordBox" Height="25" Margin="0,0,0,15"/>
             <Button Content="Sign In" Height="30" Click="LoginButton_Click"/>
         </StackPanel>
