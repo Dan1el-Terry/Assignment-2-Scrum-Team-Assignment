@@ -11,6 +11,16 @@ namespace Assign_2
         public MainWindow()
         {
             InitializeComponent();
+
+            try
+            {
+                SensorsDatabase.Initialize();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Database error:\n\n" + ex.Message);
+            }
         }
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
