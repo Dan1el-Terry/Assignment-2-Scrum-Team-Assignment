@@ -5,6 +5,7 @@ namespace SprintUnitTests;
 
 public class UserDatabaseTests
 {
+    // Test cases for UserDatabase class
     [Fact]
     public void Login_ValidAdminCredentials_ReturnsTrueAndAdminRole()
     {
@@ -13,6 +14,7 @@ public class UserDatabaseTests
         Assert.Equal("Admin", role);
     }
 
+    // Test case for a valid user login
     [Fact]
     public void Login_ValidUserCredentials_ReturnsTrueAndUserRole()
     {
@@ -21,6 +23,7 @@ public class UserDatabaseTests
         Assert.Equal("User", role);
     }
 
+    // Test case for an invalid password
     [Fact]
     public void Login_InvalidPassword_ReturnsFalse()
     {
@@ -28,6 +31,7 @@ public class UserDatabaseTests
         Assert.False(success);
     }
 
+    // Test case for a non-existent user
     [Fact]
     public void Login_NonExistentUser_ReturnsFalse()
     {
@@ -35,6 +39,7 @@ public class UserDatabaseTests
         Assert.False(success);
     }
 
+    // Test case for registering a new user
     [Fact]
     public void Register_NewUser_SuccessfullyAddsUser()
     {
@@ -47,6 +52,7 @@ public class UserDatabaseTests
         Assert.Equal("User", role);
     }
 
+    // Test case for registering a user with a duplicate username
     [Fact]
     public void Register_DuplicateUsername_ThrowsException()
     {

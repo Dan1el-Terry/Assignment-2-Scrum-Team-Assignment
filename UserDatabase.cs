@@ -9,7 +9,7 @@ public static class UserDatabase
     private static readonly string ProjectRoot =
         Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\"));
 
-    private static readonly string DbPath = Path.Combine(ProjectRoot, "users.mdf");
+    private static readonly string DbPath = Path.Combine(ProjectRoot, "appdatabase.mdf");
 
     private const string DatabaseName = "UserDb_Root";
 
