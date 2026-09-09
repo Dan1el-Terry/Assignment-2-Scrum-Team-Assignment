@@ -22,7 +22,12 @@ namespace Assign_2
                     "Database error:\n\n" + ex.Message);
             }
         }
-
+        /// <summary>
+        /// Compares users account input to the database accountcredentials.
+        /// If matches then sends user to their account role's screen.
+        /// </summary>
+        /// <param name="sender">The login button that was Clicked</param>
+        /// <param name="e">The event data.</param>
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             string username = UsernameBox.Text.Trim();
@@ -54,17 +59,30 @@ namespace Assign_2
             }
         }
 
+
+        /// <summary>
+        /// Redundant method
+        /// change all  OpenAdminScreen(); to just ShowScreen(AdminScreen);
+        /// </summary>
         private void OpenAdminScreen()
         {
             ShowScreen(AdminScreen);
             RefreshUserList();
         }
 
+        /// <summary>
+        /// Refreshes the user grid when it is updated/changed.
+        /// </summary>
         private void RefreshUserList()
         {
             UsersGrid.ItemsSource = UserDatabase.GetAllUsers();
         }
-        //clickable table
+
+        /// <summary>
+        /// grabs the values from the box clicked to input it into the edit account input boxes.
+        /// </summary>
+        /// <param name="sender">The box on the grid that was Clicked</param>
+        /// <param name="e">The event data.</param>
         private void UsersGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             selectedUser = UsersGrid.SelectedItem as UserRecord;
@@ -86,6 +104,11 @@ namespace Assign_2
             }
         }
 
+        /// <summary>
+        /// commit the changes that were in the edit/update account input boxes.
+        /// </summary>
+        /// <param name="sender">The save changes button that was Clicked</param>
+        /// <param name="e">The event data.</param>
         private void SaveChanges_Click(object sender, RoutedEventArgs e)
         {
             if (selectedUser == null)
@@ -116,7 +139,11 @@ namespace Assign_2
                 MessageBox.Show(ex.Message);
             }
         }
-
+        /// <summary>
+        /// updates the database with the password from the input box.
+        /// </summary>
+        /// <param name="sender">The reset password button that was Clicked</param>
+        /// <param name="e">The event data.</param>
         private void ResetPassword_Click(object sender, RoutedEventArgs e)
         {
             if (selectedUser == null)
@@ -136,6 +163,11 @@ namespace Assign_2
             MessageBox.Show("Password updated.");
         }
 
+        /// <summary>
+        /// deletes a user from the database. 
+        /// </summary>
+        /// <param name="sender">The delete user button that was Clicked</param>
+        /// <param name="e">The event data.</param>
         private void DeleteUser_Click(object sender, RoutedEventArgs e)
         {
             if (selectedUser == null)
@@ -155,12 +187,20 @@ namespace Assign_2
                 RefreshUserList();
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender">The show new user button that was Clicked</param>
+        /// <param name="e">The event data.</param>
         private void ShowNewUserScreen_Click(object sender, RoutedEventArgs e)
         {
             ShowScreen(NewUserScreen);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender">The register new user button that was Clicked</param>
+        /// <param name="e">The event data.</param>
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
             string username = NewUsername.Text.Trim();
@@ -189,12 +229,20 @@ namespace Assign_2
                 MessageBox.Show(ex.Message);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender">The retunr button that was Clicked</param>
+        /// <param name="e">The event data.</param>
         private void ReturnButton_Click(object sender, RoutedEventArgs e)
         {
             OpenAdminScreen();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender">The logout button that was Clicked</param>
+        /// <param name="e">The event data.</param>
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
             UsernameBox.Text = "";
@@ -202,6 +250,10 @@ namespace Assign_2
             ShowScreen(LoginScreen);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="screenToShow"></param>
         private void ShowScreen(UIElement screenToShow)
         {
             LoginScreen.Visibility = Visibility.Collapsed;
