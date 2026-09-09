@@ -10,3 +10,9 @@ The app supports Administrator and User roles, password login authentication and
 
 The app stores data in a database, including:
 - User credentials
+
+##Commands:
+-dotnet test "./Assign2.sln" (run tests)
+-mkdir "" (create new folder)
+-cd"" (go to new folder)
+-dotnet new xunit3 (create xnit 3 template)
